@@ -1,7 +1,11 @@
+.vscode
+
 # Logs
 logs
 *.log
 npm-debug.log*
+*.lock
+
 
 # Runtime data
 pids
