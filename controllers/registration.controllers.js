@@ -205,3 +205,30 @@ exports.delete = (req,res) => {
     }
   });
 }
+
+exports.getDetail = async (req,res) => {
+	const SubjID = req.query.SubjID; 
+	const query_string = "select SName, Credit from Subj where SID = ?"
+	let result;
+	try{	
+		result = await query(query_string, [SubjID]	);
+		res.json(result[0]);
+		
+	} catch (e) {
+		console.error(e);
+		res.status(500).json({status:0, error:"error"});	
+	}
+	res.json(result);
+}
+
+function query(string, val){
+	return new Promise( (resolve,reject) => {
+	  db.query(string, val, (err, results) => {
+			if(err)
+				reject(err);
+			else{
+				resolve(results);
+			}
+		});	
+	});
+}

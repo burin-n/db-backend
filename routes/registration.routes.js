@@ -1,5 +1,12 @@
 module.exports = (app) => {
-  const regist = require('../controllers/registration.controllers')
+	const regist = require('../controllers/registration.controllers')
+
+	try {
+		app.get('/register/detail', regist.getDetail);
+	}
+	catch (e) {
+
+	}
   app.get('/', regist.greeting);
   app.post('/register/result', regist.getRegisterResult);
 
@@ -11,4 +18,5 @@ module.exports = (app) => {
   .get(regist.getRequestResult)
   .post(regist.register)
   .delete(regist.delete);
-}
+
+	}
