@@ -77,6 +77,7 @@ exports.processRequest = (req,res) => {
 		let query_string = "insert into Register set ?";
 
 		return Promise.all(data_list.map( (data) => {
+
 			let num_stu = parseInt(_.get(data, ['studentIDs','length'], 0));
 			let num_seat = parseInt(_.get(data, ['section','Seat'], 0));
 			let selectedStudents = [];
@@ -91,6 +92,7 @@ exports.processRequest = (req,res) => {
 			}
 
 			return Promise.all(selectedStudents.map( (stu_id) => {
+
 				return new Promise( (resolve,reject) => {
 					let values = {
 						StudentID: stu_id,
@@ -109,6 +111,7 @@ exports.processRequest = (req,res) => {
 						else resolve(results);
 					});
 				});	
+
 			}));
 
 		}));	
@@ -136,13 +139,28 @@ exports.getRequestResult = (req,res) => {
 }
 
 exports.register = (req,res) => {
-  const query_string = "insert into Request set ?";
-  const values = req.body;
-  db.query(query_string, values, (err, results) => {
+  const query_string = "insert into Request values ?";
+	const fields = ['StudentID', 'SubjID', 'CYear', 'CSemester', 'SecID']
+  const values = [];
+	let stu_id = _.get(req,['body','StudentID'],null);	
+	let year = _.get(req, ['body', 'CYear'] , null);
+	let semester = _.get(req, ['body', 'CSemester'], null);
+	_.get(req, ['body', 'Subjects']).forEach( ({SubjID, SecID}) => {
+		values.push([
+			stu_id,
+			SubjID,
+			year,
+			semester,
+			SecID	
+		]);
+	});
+
+  db.query(query_string, [values], (err, results) => {
     if(err)
       console.log(err);
     else{
-      res.json({status:1,messaage:"done"});
+			
+      res.json({status:1,messaage: results.affectedRows + " subjects saved"});
     }
   });
 }
