@@ -6,13 +6,17 @@ exports.greeting = (req,res) => {
 }
 
 exports.getRegisterResult = (req,res) => {
+
 	const query_string = "select SubjID,SecID from Register where \
 	StudentID = ? and CYear = ? and CSemester = ?" 
+
 	const fields = ['StudentID', 'CYear', 'CSemester'];
 	let values = [];
+
 	fields.forEach( (field) => {
 		values.push(req.body[field]);
 	});
+
 	db.query(query_string,values, (err,results) => {
 		if(err)
 			console.log(err);
@@ -125,6 +129,23 @@ exports.processRequest = (req,res) => {
 	});
 }
 
+exports.deleteRegister = (req,res) => {
+	const query_string = "delete from Register where CSemester = ? \
+												and CYear = ?";
+	db.query(query_string, [
+		_.get(req, ['body', 'CSemester'], null),
+		_.get(req, ['body', 'CYear'], null)
+	], (err, results) => {
+		if(err){
+			console.error(err);
+			res.status(500).json({status:0, error:"error"});
+		}
+		else{
+			res.json({status:1, message:"done"});		
+		}	
+	});		
+}
+
 exports.getRequestResult = (req,res) => {
   const query_string = "select * from Request where StudentID = ? \
   order by SubjID DESC, CSemester DESC, SubjID DESC";
@@ -145,6 +166,7 @@ exports.register = (req,res) => {
 	let stu_id = _.get(req,['body','StudentID'],null);	
 	let year = _.get(req, ['body', 'CYear'] , null);
 	let semester = _.get(req, ['body', 'CSemester'], null);
+
 	_.get(req, ['body', 'Subjects']).forEach( ({SubjID, SecID}) => {
 		values.push([
 			stu_id,
@@ -166,13 +188,14 @@ exports.register = (req,res) => {
 }
 
 exports.delete = (req,res) => {
-  let query_string = "DELETE FROM Request WHERE StudentID = ? and SubjID = ? \
-  and CYear = ? and CSemester  = ? and SecID = ?";
-  const fields = ['StudentID', 'SubjID', 'CYear', 'CSemester', 'SecID'];
+  let query_string = "DELETE FROM Request WHERE StudentID = ? and \
+											CYear = ? and CSemester  = ?";
+  const fields = ['StudentID', 'CYear', 'CSemester'];
   let values= []
   fields.forEach( (field) => {
      values.push(req.body[field]); 
   });
+
   db.query(query_string, values, (err, results) => {
     if(err)
       console.log(err);
