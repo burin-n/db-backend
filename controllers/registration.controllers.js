@@ -181,7 +181,6 @@ exports.register = (req,res) => {
     if(err)
       console.log(err);
     else{
-			
       res.json({status:1,messaage: results.affectedRows + " subjects saved"});
     }
   });
@@ -213,12 +212,69 @@ exports.getDetail = async (req,res) => {
 	try{	
 		result = await query(query_string, [SubjID]	);
 		res.json(result[0]);
-		
 	} catch (e) {
 		console.error(e);
 		res.status(500).json({status:0, error:"error"});	
 	}
 	res.json(result);
+}
+
+exports.add = async (req,res) => {
+
+	const query_string = "select Seat,RegSeat from Section where SubjID = ? and \
+												CYear = ? and CSemester = ? and SecID = ?";
+	const fields = ['SubjID', 'CYear', 'CSemester', 'SecID'];	
+	let values = [];
+
+	fields.forEach( (field) => {
+		values.push( _.get(req, ['body',field], null) );
+	});
+
+	let seat = await query(query_string, values);
+	let RegSeat = _.get(seat, [0, 'RegSeat'], 100);
+	let Seat = _.get(seat, [0, 'Seat'] , 100);
+
+
+	const query_insert = "insert into Register set ?"
+	const val_insert = {
+		'StudentID': req.body.StudentID,
+		'SubjID': req.body.SubjID, 
+		'CYear' : req.body.CYear,
+		'CSemester' : req.body.CSemester, 
+		'SecID' : req.body.SecID, 
+	}
+
+	if( RegSeat < Seat ){
+		try{
+			let result = await query(query_insert, val_insert);
+			res.json({status:1, message:"success"});	
+		}catch(e){
+			console.log(e);
+			res.status(500).json({status:0, error:"error"});
+		}
+	}
+	else{
+		res.json({status:1, message:"failed"});
+	}
+	
+}
+
+exports.remove = async (req,res) => {
+	const query_string = "delete from Register where StudentID = ? and SubjID = ? and \
+												CYear = ? and CSemester = ? and SecID = ?";
+	const fields = ['StudentID','SubjID', 'CYear', 'CSemester', 'SecID'];	
+	let values = [];
+	fields.forEach( field => {
+		values.push( _.get(req, ['body', field], null) );
+	});
+	
+	try{
+		let result = await query(query_string, values);
+		res.json({status:1, message:"success"});	
+	}catch(e){
+		console.log(e);
+		res.status(500).json({status:0, error:"error"});
+	}
 }
 
 function query(string, val){
@@ -232,3 +288,5 @@ function query(string, val){
 		});	
 	});
 }
+
+
