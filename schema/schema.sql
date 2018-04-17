@@ -6,7 +6,7 @@ DROP TABLE if exists Faculty;
 CREATE TABLE Faculty (
 	FID			varchar(5) not null,
     FName		varchar(15) not null,
-    FShortName	varchar(3) not null,
+    FShortName	varchar(5) not null,
     primary key (FID)
 );
 
@@ -15,7 +15,7 @@ CREATE TABLE Department (
 	FID			varchar(5) not null,
 	DID			varchar(5) not null,
     DName		varchar(15) not null,
-    DShortName	varchar(3) not null,
+    DShortName	varchar(5) not null,
     primary key (FID, DID),
     constraint fk_FID
 		foreign key (FID)
@@ -28,7 +28,7 @@ DROP TABLE if exists Building;
 CREATE TABLE Building (
 	BID			varchar(5) not null,
     BName		varchar(15) not null,
-    BShortName	varchar(3) not null,
+    BShortName	varchar(5) not null,
     primary key (BID)
 );
 
@@ -52,7 +52,7 @@ CREATE TABLE Curriculum (
     CID			varchar(5) not null,
     CName		varchar(15) not null,
     Fee			int unsigned default 0,
-    OverallCredit	int unsigned not null,
+    OverallCredit	int unsigned default 18,		##### derive
     GenedCredit		int unsigned default 12,
     FreeElecCredit	int unsigned default 6,
     ApproveCredit	int unsigned default 0,
@@ -69,12 +69,12 @@ DROP TABLE if exists Student;
 CREATE TABLE Student (
 	SID		varchar(10) not null,
     Fname	varchar(15) not null,
-    Mname	varchar(15) not null,
+    Mname	varchar(15),
     Lname	varchar(15) not null,
     SSN		varchar(13) not null,
     Sex		enum('F', 'M') default 'F',
     Bdate	date not null,
-    Email	varchar(20) not null,
+    Email	varchar(30) not null,
     Address	varchar(30) not null,
 	FID		varchar(5) not null,
 	DID		varchar(5) not null,
@@ -91,12 +91,12 @@ DROP TABLE if exists Teacher;
 CREATE TABLE Teacher (
 	TID		varchar(10) not null,
     Fname	varchar(15) not null,
-    Mname	varchar(15) not null,
+    Mname	varchar(15),
     Lname	varchar(15) not null,
     SSN		varchar(13) not null,
     Sex		enum('F', 'M') default 'F',
     Bdate	date not null,
-    Email	varchar(20) not null,
+    Email	varchar(30) not null,
     Address	varchar(30) not null,
 	FID		varchar(5) not null,
 	DID		varchar(5) not null,
@@ -113,7 +113,7 @@ CREATE TABLE Subj (
 	SID		varchar(7) not null,
     SName	varchar(15) not null,
     Credit	int unsigned default 3,
-    SType	varchar(9),
+    SType	enum('GenEd', 'FreeElect', 'Approve', 'GenLang'),
     primary key (SID)
 );
 
@@ -193,10 +193,10 @@ CREATE TABLE RoomTable (
 DROP TABLE if exists FeeStatus;
 CREATE TABLE FeeStatus (
 	StudentID	varchar(10) not null,
-    CYear		year not null,
-    CSemester	enum('1', '2') not null,
+    FYear		year not null,
+    FSemester	enum('1', '2') not null,
     FStatus		enum('Y', 'N') default 'N',
-    primary key (StudentID, CYear, CSemester),
+    primary key (StudentID, FYear, FSemester),
     constraint fk_StudentIDF
 		foreign key (StudentID)
         references Student(SID)
@@ -215,7 +215,7 @@ CREATE TABLE Announcement (
 DROP TABLE if exists Request;
 CREATE TABLE Request (
 	StudentID	varchar(10) not null,
-	SubjID		varchar(5) not null,
+	SubjID		varchar(7) not null,
     CYear		year not null,
     CSemester	enum('1', '2') not null,
 	SecID		int unsigned default 1,
@@ -235,11 +235,11 @@ CREATE TABLE Request (
 DROP TABLE if exists Register;
 CREATE TABLE Register (
 	StudentID	varchar(10) not null,
-	SubjID		varchar(5) not null,
+	SubjID		varchar(7) not null,
     CYear		year not null,
     CSemester	enum('1', '2') not null,
 	SecID		int unsigned default 1,
-    Grade		int unsigned,		####
+    Grade		enum('A', 'B+', 'B', 'C+', 'C', 'D+', 'D', 'F', 'I', 'M', 'P', 'S', 'U', 'V', 'W', 'X') default 'X',
     MSeatNo		int unsigned,
     FSeatNo		int unsigned,
     primary key (StudentID, SubjID, CYear, CSemester, SecID),
@@ -260,7 +260,7 @@ CREATE TABLE Register (
 DROP TABLE if exists Teach;
 CREATE TABLE Teach (
 	TeacherID	varchar(10) not null,
-	SubjID		varchar(5) not null,
+	SubjID		varchar(7) not null,
     CYear		year not null,
     CSemester	enum('1', '2') not null,
 	SecID		int unsigned default 1,
@@ -324,7 +324,7 @@ CREATE TABLE CompulsorySubject (
     CID		varchar(5) not null,
     SubjID	varchar(7) not null,
     primary key (FID, DID, CID, SubjID),
-    constraint fk_SujIDC
+    constraint fk_SubjIDC
 		foreign key (SubjID)
         references Subj(SID)
 			on delete cascade
