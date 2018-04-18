@@ -54,7 +54,7 @@ CREATE TABLE Curriculum (
     Fee			int unsigned default 0,
     OverallCredit	int unsigned default 18,		##### derive
     GenedCredit		int unsigned default 12,
-    FreeElecCredit	int unsigned default 6,
+    FreeElectCredit	int unsigned default 6,
     ApproveCredit	int unsigned default 0,
     GenlangCredit	int unsigned default 0,
     primary key (FID, DID, CID),
@@ -122,8 +122,10 @@ CREATE TABLE Course (
 	SubjID		varchar(7) not null,
     CYear		year not null,
     CSemester	enum('1', '2') not null,
-	MExamDate	datetime,
-    FExamDate	datetime,
+	MExamS		datetime,
+    MExamF		datetime,
+    FExamS		datetime,
+    FExamF		datetime,
     primary key (SubjID, CYear, CSemester),
     constraint fk_SubjID
 		foreign key (SubjID)
@@ -150,7 +152,7 @@ CREATE TABLE Section (
 
 DROP TABLE if exists SecTime;
 CREATE TABLE Sectime (
-	SubjID		varchar(5) not null,
+	SubjID		varchar(7) not null,
     CYear		year not null,
     CSemester	enum('1', '2') not null,
 	SecID		int unsigned default 1,
@@ -178,8 +180,8 @@ DROP TABLE if exists RoomTable;
 CREATE TABLE RoomTable (
 	BuildID		varchar(5) not null,
 	RoomID		varchar(5) not null,
-    StartTime	time not null,
-    FinishTime	time not null,
+    StartTime	datetime not null,
+    FinishTime	datetime not null,
     ReserveBy	varchar(15) not null,
     Objective	varchar(15) not null,
     primary key (BuildID, RoomID, StartTime),
