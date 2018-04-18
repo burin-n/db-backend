@@ -6,9 +6,10 @@ exports.greeting = (req,res) => {
 }
 
 exports.getRegisterResult = async (req,res) => {
-	console.log("hello");
-	const query_string = "select SubjID,SecID from Register where \
-	StudentID = ? and CYear = ? and CSemester = ?" 
+
+	const query_string  = "select SubjID,SecID,SName,Credit \
+		from Register R, Subj S where R.StudentID = ? and R.CYear = ? \
+		and R.CSemester = ? and S.SID = R.SubjID";
 
 	const fields = ['StudentID', 'CYear', 'CSemester'];
 	let values = [];
@@ -18,14 +19,6 @@ exports.getRegisterResult = async (req,res) => {
 	});
 	
 	results = await query(query_string, values);
-
-	const query_string_2 = "select SName, Credit from Subj \
-												where SID = ?";	
-
-	for(let i = 0; i < results.length; i++){
-		detail = await query(query_string_2, [results[i].SubjID]);		
-		results[i] = {...results[i], ...detail[0]};
-	}	
 
 	let ret = {};
 	ret.StudentID = req.body.StudentID;
