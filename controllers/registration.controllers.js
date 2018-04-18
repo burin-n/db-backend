@@ -5,8 +5,8 @@ exports.greeting = (req,res) => {
   res.json({greet:"hello"})
 }
 
-exports.getRegisterResult = (req,res) => {
-
+exports.getRegisterResult = async (req,res) => {
+	console.log("hello");
 	const query_string = "select SubjID,SecID from Register where \
 	StudentID = ? and CYear = ? and CSemester = ?" 
 
@@ -16,13 +16,23 @@ exports.getRegisterResult = (req,res) => {
 	fields.forEach( (field) => {
 		values.push(req.body[field]);
 	});
+	
+	results = await query(query_string, values);
 
-	db.query(query_string,values, (err,results) => {
-		if(err)
-			console.log(err);
-		else
-			res.json({status:1, messaage:"done", data:results});
-	});
+	const query_string_2 = "select SName, Credit from Subj \
+												where SID = ?";	
+
+	for(let i = 0; i < results.length; i++){
+		detail = await query(query_string_2, [results[i].SubjID]);		
+		results[i] = {...results[i], ...detail[0]};
+	}	
+
+	let ret = {};
+	ret.StudentID = req.body.StudentID;
+	ret.CYear = req.body.CYear;
+ 	ret.CSemester = req.body.CSemester;	
+	ret.Subjects = results;	
+	res.json(ret);
 }
 
 exports.processRequest = (req,res) => {
