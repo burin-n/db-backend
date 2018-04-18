@@ -13,6 +13,9 @@ module.exports = () => {
 		extended: true
 	}));
 	app.use(bodyParser.json());
-	require('../routes/registration.routes')(app)
+
+	require('../routes/register.routes')(app)
+	require('../routes/request.routes.js')(app)
+
 	return app;
 }
