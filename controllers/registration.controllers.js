@@ -211,12 +211,14 @@ exports.getDetail = async (req,res) => {
 	let result;
 	try{	
 		result = await query(query_string, [SubjID]	);
-		res.json(result[0]);
+		if(result.length === 0)
+			res.json({status:2, message:"no subject found"});
+		else
+			res.json({...result[0], status:1});
 	} catch (e) {
 		console.error(e);
 		res.status(500).json({status:0, error:"error"});	
 	}
-	res.json(result);
 }
 
 exports.add = async (req,res) => {
