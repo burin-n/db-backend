@@ -226,22 +226,19 @@ exports.getDetail = async (req,res) => {
 
 exports.add = async (req,res) => {
 
-	const query_string = "select Seat,RegSeat from Section where SubjID = ? and \
+	const query_current = "select SubjID from Register where StudentID = ? \
+												 and CYear = ? and CSemester = ?";
+	const fields_current = ['StudentID', 'CYear', 'CSemester'];
+	let val_current = [];	
+
+
+	const query_seat = "select Seat,RegSeat from Section where SubjID = ? and \
 												CYear = ? and CSemester = ? and SecID = ?";
-	const fields = ['SubjID', 'CYear', 'CSemester', 'SecID'];	
-	let values = [];
-
-	fields.forEach( (field) => {
-		values.push( _.get(req, ['body',field], null) );
-	});
-
-	let seat = await query(query_string, values);
-	let RegSeat = _.get(seat, [0, 'RegSeat'], 100);
-	let Seat = _.get(seat, [0, 'Seat'] , 100);
-
+	const field_seat = ['SubjID', 'CYear', 'CSemester', 'SecID'];	
+	let val_seat = [];
 
 	const query_insert = "insert into Register set ?"
-	const val_insert = {
+	let val_insert = {
 		'StudentID': req.body.StudentID,
 		'SubjID': req.body.SubjID, 
 		'CYear' : req.body.CYear,
@@ -249,20 +246,56 @@ exports.add = async (req,res) => {
 		'SecID' : req.body.SecID, 
 	}
 
-	if( RegSeat < Seat ){
-		try{
-			let result = await query(query_insert, val_insert);
-			res.json({status:1, message:"success"});	
-		}catch(e){
-			console.log(e);
-			res.status(500).json({status:0, error:"error"});
-		}
-	}
-	else{
-		res.json({status:1, message:"failed"});
-	}
+	fields_current.forEach( (field) => {
+		val_current.push(req.body[field]);	
+	});
 	
+	current_register = await query(query_current, val_current);
+	current_register_list = current_register.map ( e => {
+		return e.SubjID;
+	});
+
+	field_seat.forEach( (field) => {
+		val_seat.push( _.get(req, ['body',field], null) );
+	});
+
+	let ret = [];
+	for(let subj of req.body.Subjects){
+				
+		val_seat[0] = subj.SubjID;	
+		val_seat[3] = subj.SecID;
+
+		let seat = await query(query_seat, val_seat);
+		let RegSeat = _.get(seat, [0, 'RegSeat'], 100);
+		let Seat = _.get(seat, [0, 'Seat'] , 100);
+		
+		if(current_register_list.indexOf(subj.SubjID) >= 0){
+			result = "already added";
+		}
+		else if( RegSeat < Seat ){
+			try{
+				val_insert.SubjID = subj.SubjID;
+				val_insert.SecID = subj.SecID;
+				await query(query_insert, val_insert);
+				result = "success"
+			}catch(e){
+				console.log(e);
+				result = "error";
+			}
+		}
+		else{
+			result = "failed"
+		}
+
+		ret.push({});
+		_.set(ret, [ret.length-1, "SubjID" ], subj.SubjID);
+		_.set(ret, [ret.length-1, "SecID" ], subj.SecID);
+		_.set(ret, [ret.length-1, "Result"], result);
+	}
+
+	res.json({status:1, result:ret});
 }
+
 
 exports.remove = async (req,res) => {
 	const query_string = "delete from Register where StudentID = ? and SubjID = ? and \
