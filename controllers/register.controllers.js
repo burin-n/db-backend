@@ -53,51 +53,56 @@ exports.add = async (req,res) => {
 	fields_current.forEach( (field) => {
 		val_current.push(req.body[field]);	
 	});
-	
-	current_register = await query(query_current, val_current);
-	current_register_list = current_register.map ( e => {
-		return e.SubjID;
-	});
 
-	field_seat.forEach( (field) => {
-		val_seat.push( _.get(req, ['body',field], null) );
-	});
+	try{
+		current_register = await query(query_current, val_current);
+		current_register_list = current_register.map ( e => {
+			return e.SubjID;
+		});
 
-	let ret = [];
-	for(let subj of req.body.Subjects){
-				
-		val_seat[0] = subj.SubjID;	
-		val_seat[3] = subj.SecID;
+		field_seat.forEach( (field) => {
+			val_seat.push( _.get(req, ['body',field], null) );
+		});
 
-		let seat = await query(query_seat, val_seat);
-		let RegSeat = _.get(seat, [0, 'RegSeat'], 100);
-		let Seat = _.get(seat, [0, 'Seat'] , 100);
-		
-		if(current_register_list.indexOf(subj.SubjID) >= 0){
-			result = "already added";
-		}
-		else if( RegSeat < Seat ){
-			try{
-				val_insert.SubjID = subj.SubjID;
-				val_insert.SecID = subj.SecID;
-				await query(query_insert, val_insert);
-				result = "success"
-			}catch(e){
-				console.log(e);
-				result = "error";
+		let ret = [];
+		for(let subj of req.body.Subjects){
+					
+			val_seat[0] = subj.SubjID;	
+			val_seat[3] = subj.SecID;
+
+			let seat = await query(query_seat, val_seat);
+			let RegSeat = _.get(seat, [0, 'RegSeat'], 100);
+			let Seat = _.get(seat, [0, 'Seat'] , 100);
+			
+			if(current_register_list.indexOf(subj.SubjID) >= 0){
+				result = "already added";
 			}
-		}
-		else{
-			result = "failed"
+			else if( RegSeat < Seat ){
+				try{
+					val_insert.SubjID = subj.SubjID;
+					val_insert.SecID = subj.SecID;
+					await query(query_insert, val_insert);
+					result = "success"
+				}catch(e){
+					console.log(e);
+					result = "error";
+				}
+			}
+			else{
+				result = "failed"
+			}
+
+			ret.push({});
+			_.set(ret, [ret.length-1, "SubjID" ], subj.SubjID);
+			_.set(ret, [ret.length-1, "SecID" ], subj.SecID);
+			_.set(ret, [ret.length-1, "Result"], result);
 		}
 
-		ret.push({});
-		_.set(ret, [ret.length-1, "SubjID" ], subj.SubjID);
-		_.set(ret, [ret.length-1, "SecID" ], subj.SecID);
-		_.set(ret, [ret.length-1, "Result"], result);
+		res.json({status:1, result:ret});
+	}catch(e){
+		console.error(e);
+		res.status(500).json({status:0, error:"error"})
 	}
-
-	res.json({status:1, result:ret});
 }
 
 
@@ -136,12 +141,14 @@ exports.remove = async (req,res) => {
 
 }
 
+// add year & semester
 exports.getDetail = async (req,res) => {
-	const SubjID = req.query.SubjID; 
-	const query_string = "select SName, Credit from Subj where SID = ?"
+	const {SubjID, CYear, CSemester} = req.query; 
+	const query_string = "select S.SName, S.Credit from Subj S,Section R where S.SID = ?\
+		and R.CYear = ? and R.CSemester = ? and S.SID = R.SubjID ";
 	let result;
 	try{	
-		result = await query(query_string, [SubjID]	);
+		result = await query(query_string, [SubjID, CYear, CSemester]);
 		if(result.length === 0)
 			res.json({status:2, message:"no subject found"});
 		else
