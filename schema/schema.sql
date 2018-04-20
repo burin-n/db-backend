@@ -340,11 +340,13 @@ CREATE TABLE CompulsorySubject (
 
 DROP TABLE if exists StudentUser;
 CREATE TABLE StudentUser (
-	SSN varchar(10) not null,
-	PASS varchar(20) not null,
-	primary key (SSN),
-	constrain fk_ssn
-		foreign key (SSN)	references Student (SID)
-			on delete cascade
-			on update cascade
-)
+	SID varchar(10) not null,
+	password varchar(20) not null,
+    token varchar(100),
+	primary key (SID),
+	constraint fk_sid
+		foreign key (SID)	
+			references Student (SID)
+				on delete cascade
+				on update cascade
+);

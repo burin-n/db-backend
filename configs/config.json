@@ -1,0 +1,13 @@
+{
+	"db" : {
+		"host" : "localhost",
+		"user" : "root",
+		"password" : "root",
+		"database" : "RegChula"
+	},
+	
+	"app" :{
+		"host" : "localhost",
+		"port" : 3000
+	}
+}

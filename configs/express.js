@@ -12,10 +12,12 @@ module.exports = () => {
 		limits: '10mb',
 		extended: true
 	}));
+
 	app.use(bodyParser.json());
 
 	require('../routes/register.routes')(app)
-	require('../routes/request.routes.js')(app)
+	require('../routes/request.routes')(app)
+	require('../routes/user.routes')(app)
 
 	return app;
 }

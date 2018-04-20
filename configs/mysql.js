@@ -1,11 +1,7 @@
-var mysql = require('mysql');
+let mysql = require('mysql');
+let db_conf = require('./config').db;
 
-var connection = mysql.createConnection({
-  host     : 'localhost',
-  user     : 'root',
-  password : 'root',
-  database : 'RegChula'
-});
+var connection = mysql.createConnection(db_conf);
 
 
 exports.createConnection = () => {

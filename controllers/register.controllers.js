@@ -10,51 +10,62 @@ exports.getRegisterResult = async (req,res) => {
 		from Register R, Subj S where R.StudentID = ? and R.CYear = ? \
 		and R.CSemester = ? and S.SID = R.SubjID";
 
-	const fields = ['StudentID', 'CYear', 'CSemester'];
-	let values = [];
+	const fields = ['CYear', 'CSemester'];
 
-	fields.forEach( (field) => {
-		values.push(req.body[field]);
-	});
-	
-	results = await query(query_string, values);
+	try{
+		let values = [_.get(req,['user','SID'], null)];
 
-	let ret = {};
-	ret.StudentID = req.body.StudentID;
-	ret.CYear = req.body.CYear;
- 	ret.CSemester = req.body.CSemester;	
-	ret.Subjects = results;	
-	res.json(ret);
+		fields.forEach( (field) => {
+			values.push(req.body[field]);
+		});
+		
+		
+		results = await query(query_string, values);
+
+		let ret = {};
+		ret.StudentID = req.user.SID;
+		ret.CYear = req.body.CYear;
+		ret.CSemester = req.body.CSemester;	
+		ret.Subjects = results;	
+		res.json(ret);
+	}
+	catch (e){
+		console.error(e);
+		res.json({status:0});
+	}
 }
 
 // add subject
 exports.add = async (req,res) => {
 
-	const query_current = "select SubjID from Register where StudentID = ? \
-												 and CYear = ? and CSemester = ?";
-	const fields_current = ['StudentID', 'CYear', 'CSemester'];
-	let val_current = [];	
-
-
-	const query_seat = "select Seat,RegSeat from Section where SubjID = ? and \
-												CYear = ? and CSemester = ? and SecID = ?";
-	const field_seat = ['SubjID', 'CYear', 'CSemester', 'SecID'];	
-	let val_seat = [];
-
-	const query_insert = "insert into Register set ?"
-	let val_insert = {
-		'StudentID': req.body.StudentID,
-		'SubjID': req.body.SubjID, 
-		'CYear' : req.body.CYear,
-		'CSemester' : req.body.CSemester, 
-		'SecID' : req.body.SecID, 
-	}
-
-	fields_current.forEach( (field) => {
-		val_current.push(req.body[field]);	
-	});
-
 	try{
+
+		const query_current = "select SubjID from Register where StudentID = ? \
+													 and CYear = ? and CSemester = ?";
+		const fields_current = ['CYear', 'CSemester'];
+		let val_current = [_.get(req, ['user','SID'], null)];
+
+
+		const query_seat = "select Seat,RegSeat from Section where SubjID = ? and \
+													CYear = ? and CSemester = ? and SecID = ?";
+		const field_seat = ['SubjID', 'CYear', 'CSemester', 'SecID'];	
+		let val_seat = [];
+
+
+		const query_insert = "insert into Register set ?"
+		let val_insert = {
+			'StudentID': req.user.SID,
+			'SubjID': req.body.SubjID, 
+			'CYear' : req.body.CYear,
+			'CSemester' : req.body.CSemester, 
+			'SecID' : req.body.SecID, 
+		}
+
+
+		fields_current.forEach( (field) => {
+			val_current.push(req.body[field]);	
+		});
+
 		current_register = await query(query_current, val_current);
 		current_register_list = current_register.map ( e => {
 			return e.SubjID;
@@ -73,7 +84,7 @@ exports.add = async (req,res) => {
 			let seat = await query(query_seat, val_seat);
 			let RegSeat = _.get(seat, [0, 'RegSeat'], 100);
 			let Seat = _.get(seat, [0, 'Seat'] , 100);
-			
+				
 			if(current_register_list.indexOf(subj.SubjID) >= 0){
 				result = "already added";
 			}
@@ -99,6 +110,7 @@ exports.add = async (req,res) => {
 		}
 
 		res.json({status:1, result:ret});
+
 	}catch(e){
 		console.error(e);
 		res.status(500).json({status:0, error:"error"})
@@ -108,46 +120,50 @@ exports.add = async (req,res) => {
 
 //remove subject
 exports.remove = async (req,res) => {
-	const {Subjects} = req.body; 
-
-	const query_string = "delete from Register where StudentID = ? and SubjID = ? and \
-												CYear = ? and CSemester = ? and SecID = ?";
-	const fields = ['StudentID','SubjID', 'CYear', 'CSemester', 'SecID'];	
-	let values = [];
-
-	fields.forEach( field => {
-		values.push( _.get(req, ['body', field], null) );
-	});
 	
-	let ret = [];
+	try{
+		const {Subjects} = req.body; 
 
-	for(let subj of Subjects){
+		const query_string = "delete from Register where StudentID = ? and SubjID = ? and \
+													CYear = ? and CSemester = ? and SecID = ?";
+		const fields = ['SubjID', 'CYear', 'CSemester', 'SecID'];	
+		let values = [ _.get(req, ['user','SID'],null)];
 
-		values[1] = subj.SubjID;
-		values[4] = subj.SecID;
+		fields.forEach( field => {
+			values.push( _.get(req, ['body', field], null) );
+		});
+		
+		let ret = [];
 
-		try{
-			await query(query_string, values);
-			result = "success";
-		}catch(e){
-			console.log(e);
-			result = "fail"
+		for(let subj of Subjects){
+
+			values[1] = subj.SubjID;
+			values[4] = subj.SecID;
+
+			try{
+				await query(query_string, values);
+				result = "success";
+			}catch(e){
+				console.log(e);
+				result = "fail"
+			}
+			ret.push({ SubjID: subj.SubjID, result });
 		}
-
-		ret.push({ SubjID: subj.SubjID, result });
+		res.json({status:1, results:ret});	
 	}
-	
-	res.json({status:1, results:ret});	
+	catch(e){
+		res.json({status:0});
+	}
 
 }
 
 // add year & semester
 exports.getDetail = async (req,res) => {
-	const {SubjID, CYear, CSemester} = req.query; 
-	const query_string = "select S.SName, S.Credit from Subj S,Section R where S.SID = ?\
-		and R.CYear = ? and R.CSemester = ? and S.SID = R.SubjID ";
-	let result;
-	try{	
+	try{
+		const {SubjID, CYear, CSemester} = req.query; 
+		const query_string = "select S.SName, S.Credit from Subj S,Section R where S.SID = ?\
+			and R.CYear = ? and R.CSemester = ? and S.SID = R.SubjID ";
+		let result;
 		result = await query(query_string, [SubjID, CYear, CSemester]);
 		if(result.length === 0)
 			res.json({status:2, message:"no subject found"});
