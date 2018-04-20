@@ -9,5 +9,9 @@
 	"app" :{
 		"host" : "localhost",
 		"port" : 3000
+	},
+
+	"user" : {
+		"salt_len" : 10
 	}
 }

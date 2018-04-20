@@ -6,5 +6,6 @@ module.exports = function( app ) {
 	app.get('/logout', passport.authenticate('bearer', { session: false }), user.logout);
 	app.get('/profile', passport.authenticate('bearer', { session: false }), user.profile);
 
+	app.post('/setpassword', user.set_password);
 }
 

@@ -341,8 +341,9 @@ CREATE TABLE CompulsorySubject (
 DROP TABLE if exists StudentUser;
 CREATE TABLE StudentUser (
 	SID varchar(10) not null,
-	password varchar(20) not null,
-    token varchar(100),
+	password varchar(200) not null,
+	password_plain varchar(20) not null,
+	token varchar(200),
 	primary key (SID),
 	constraint fk_sid
 		foreign key (SID)	
