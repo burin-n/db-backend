@@ -14,4 +14,8 @@ module.exports = (app) => {
 
 	app.post('/register/add',passport.authenticate('bearer', { session: false }),register.add);
 	app.delete('/register/remove',passport.authenticate('bearer', { session: false }),register.remove);
+	app.post('/register/withdraw', passport.authenticate('bearer', { session: false }), register.withdraw);
+	app.post('/register/fee', passport.authenticate('bearer', { session: false }), register.payFee);
+	app.get('/register/fee', passport.authenticate('bearer', { session: false }), register.feeStatus);
+
 }

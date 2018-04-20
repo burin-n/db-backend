@@ -157,6 +157,41 @@ exports.remove = async (req,res) => {
 
 }
 
+exports.withdraw = async (req,res) => {
+
+	try{
+		const query_string = "update Register set Grade = 'W' where StudentID = ? and \
+			SubjID = ? and CYear = ? and CSemester = ? and SecID = ?";
+
+		const	fields = ['StudentID','SubjID', 'CYear' , 'CSemester', 'SecID'];
+		let val = [req.user.SID, null, req.body.CYear, req.body.CSemester, null];	
+		
+		let subjects = req.body.Subjects;
+		let ret = []
+			
+		for ( let subject of subjects ){
+			let {SubjID , SecID} = subject;
+			val[1] = SubjID;
+			val[4] = SecID;	
+
+			let result = null;
+			try{
+				await query(query_string, val);
+				result = "success";
+			}
+			catch(e){
+				console.error(e);
+				result = "fail";
+			}
+			ret.push( { SubjID, SecID	, result});
+		}
+		res.json({status:1, results:ret});	
+	}catch(e){
+		console.error(e);
+		res.json({status:0});
+	}
+}
+
 // add year & semester
 exports.getDetail = async (req,res) => {
 	try{
@@ -296,6 +331,40 @@ exports.deleteRegister = (req,res) => {
 			res.json({status:1, message:"done"});		
 		}	
 	});		
+}
+
+exports.payFee = async (req,res) => {
+	try{
+		const query_string = "update FeeStatus set fstatus = 'Y' where \
+													StudentID=? and FYear=? and FSemester = ?";
+		
+		let val = [ req.user.SID, req.body.FYear, req.body.FSemester ];
+	
+		await query(query_string, val);		
+
+		res.json({status:1, message:"success"});
+
+	}catch(e){
+		console.error(e);	
+		res.json({status:0});
+	}
+}
+
+exports.feeStatus = async (req,res) => {
+	try{
+		const query_string = "select FStatus from FeeStatus where \
+													StudentID=? and FYear=? and FSemester = ?";
+		let val = [ req.user.SID, req.query.FYear, req.query.FSemester ];
+		console.log(val)
+	
+		let result = await query(query_string, val);		
+
+		res.json({status:1, result: result[0].FStatus});
+
+	}catch(e){
+		console.error(e);	
+		res.json({status:0});
+	}
 }
 
 function query(string, val){
