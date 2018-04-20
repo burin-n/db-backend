@@ -38,13 +38,11 @@ exports.login = async function(req,res){
 
 exports.logout = async function(req, res){
 	
+	try{
 	const token = _.get(req ,['user','token'], null);
 	const SID = _.get(req, ['user', 'SID'], null);
-	console.log(req.user);
-	console.log(token, SID);
 	const query_string = "update StudentUser set token = null where SID = ?";
 	
-	try{
 		let result = await query(query_string, [SID]);
 		if(result[0].affectedRows > 0)
 			res.json({status:1, message:"success"});	
