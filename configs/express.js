@@ -18,6 +18,7 @@ module.exports = () => {
 	require('../routes/register.routes')(app)
 	require('../routes/request.routes')(app)
 	require('../routes/user.routes')(app)
+	require('../routes/room.routes')(app)
 
 	return app;
 }

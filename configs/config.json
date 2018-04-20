@@ -3,7 +3,8 @@
 		"host" : "localhost",
 		"user" : "root",
 		"password" : "root",
-		"database" : "RegChula"
+		"database" : "RegChula",
+		"multipleStatements": true
 	},
 	
 	"app" :{

@@ -1,5 +1,5 @@
 let _ = require('lodash');
-let db = require('../configs/mysql').database;
+let query = require('../configs/mysql').query;
 let config = require('../configs/config').user;
 var crypto = require('crypto');
 var bcrypt = require('bcryptjs');
@@ -82,18 +82,6 @@ exports.set_password = async (req,res) => {
 		console.error(e);
 		res.json({status:0, error:e['message']});
 	}
-}
-
-function query(string, val){
-	return new Promise( (resolve,reject) => {
-	  db.query(string, val, (err, results) => {
-			if(err)
-				reject(err);
-			else{
-				resolve(results);
-			}
-		});	
-	});
 }
 
 async function hash_password(password) {

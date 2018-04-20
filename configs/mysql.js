@@ -15,4 +15,16 @@ exports.createConnection = () => {
 	// return connection;
 }
 
+exports.query = function(string, val){
+	return new Promise( (resolve,reject) => {
+	  connection.query(string, val, (err, results) => {
+			if(err)
+				reject(err);
+			else{
+				resolve(results);
+			}
+		});	
+	});
+}
+
 exports.database = connection;

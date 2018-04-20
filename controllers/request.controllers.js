@@ -1,4 +1,4 @@
-const db = require('../configs/mysql').database;
+const query = require('../configs/mysql').query;
 const _ = require('lodash'); 
 
 // get request result
@@ -86,16 +86,4 @@ exports.deleteRequest = async (req,res) => {
 		console.error(e);
 		res.status(500).json({status:0});
 	}
-}
-
-function query(string, val){
-	return new Promise( (resolve,reject) => {
-	  db.query(string, val, (err, results) => {
-			if(err)
-				reject(err);
-			else{
-				resolve(results);
-			}
-		});	
-	});
 }

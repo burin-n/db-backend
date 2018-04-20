@@ -1,4 +1,4 @@
-const db = require('../configs/mysql').database;
+const {query,db} = require('../configs/mysql');
 const _ = require('lodash'); 
 exports.greeting = (req,res) => {
   res.json({greet:"hello, this is db backend server"})
@@ -366,17 +366,3 @@ exports.feeStatus = async (req,res) => {
 		res.json({status:0});
 	}
 }
-
-function query(string, val){
-	return new Promise( (resolve,reject) => {
-	  db.query(string, val, (err, results) => {
-			if(err)
-				reject(err);
-			else{
-				resolve(results);
-			}
-		});	
-	});
-}
-
-
