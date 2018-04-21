@@ -53,7 +53,7 @@ function parseTable(a){
 	return result;
 }
 
-exports.getTable = async (req,res) => {
+exports.getSubjTable = async (req,res) => {
 	try{
 		const query_string = "select R.SubjID, ST.SDay, ST.StartTime, ST.FinishTime, ST.BuildID, ST.RoomID\
 								from Register R, Sectime ST \
@@ -75,6 +75,38 @@ exports.getTable = async (req,res) => {
 		ret.CYear = req.body.CYear;
 	 	ret.CSemester = req.body.CSemester;
 	 	ret.Table = parseTable(results);
+			
+		res.json(ret);
+	}
+	catch(e){
+		console.error(e);
+		res.status(500).json({status:0});	
+	}
+}
+
+exports.getMidTable = async (req,res) => {
+	try{
+		const query_string = "select R.SubjID, C.MExamS, C.MExamF, M.BID, M.RID\
+								from Register R, Course C, MExamAt M \
+								where R.StudentID = ? and R.Cyear = ? and R.CSemester = ?\
+								and R.CYear = C.CYear and R.CSemester = C.CSemester\
+								and R.SubjID = C.SubjID and C.SubjID = M.SubjID\
+								and C.CYear = M.CYear and C.CSemester = M.CSemester"
+
+
+		const fields = ['CYear', 'CSemester'];
+		let values = [ req.user.SID ];
+
+		fields.forEach( (field) => {
+			values.push(req.body[field]);
+		});
+
+		results = await query(query_string, values);
+		let ret = {};
+		ret.StudentID = req.user.SID;
+		ret.CYear = req.body.CYear;
+	 	ret.CSemester = req.body.CSemester;
+	 	ret.Table = results;
 			
 		res.json(ret);
 	}
