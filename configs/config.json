@@ -2,7 +2,7 @@
 	"db" : {
 		"host" : "localhost",
 		"user" : "root",
-		"password" : "root",
+		"password" : "gogogo",
 		"database" : "RegChula",
 		"multipleStatements": true
 	},
