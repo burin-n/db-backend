@@ -1,4 +1,5 @@
-const {query,db} = require('../configs/mysql');
+const query = require('../configs/mysql').query;
+const db = require('../configs/mysql').database;
 const _ = require('lodash'); 
 exports.greeting = (req,res) => {
   res.json({greet:"hello, this is db backend server"})

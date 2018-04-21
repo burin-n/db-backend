@@ -19,6 +19,7 @@ module.exports = () => {
 	require('../routes/request.routes')(app)
 	require('../routes/user.routes')(app)
 	require('../routes/room.routes')(app)
+	require('../routes/grade.routes')(app)
 
 	return app;
 }
