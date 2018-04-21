@@ -19,7 +19,7 @@ module.exports = () => {
 	require('../routes/request.routes')(app)
 	require('../routes/user.routes')(app)
 	require('../routes/room.routes')(app)
-	require('../routes/grade.routes')(app)
+	require('../routes/subjtable.routes')(app)
 
 	return app;
 }
