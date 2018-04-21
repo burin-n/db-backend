@@ -8,7 +8,7 @@ exports.compute = async (req,res) => {
 
 	const SID = req.user.SID;
 
-	map_grade ={
+	const map_grade = {
 		'A' : 4,
 		'B+' : 3.5,
 		'B' : 3,
@@ -17,9 +17,12 @@ exports.compute = async (req,res) => {
 		'D+' : 1.5,
 		'D' : 1,
 		'F' : 0,
-		//'I', 'M', 'P', 'S', 'U', 'V', 'W', 'X'
-		'X' : -1
-	}
+		
+		'S' : -1, 
+		'U' : -1, 
+		'W' : -1,
+		'X' : -2, 
+	};
 
 
 	try{
@@ -28,15 +31,17 @@ exports.compute = async (req,res) => {
 		
 		let semester = await getSemester(results);
 		
-		let gpax = 0;
-		let acc_credit = 0;
+		let CAX = 0;
+		let CGX = 0;
+		let GPAX = 0;
+		let GPX = 0;
 
 
 		for (let sem of semester){
 			let subjs = [];
-
-			let gpa = 0;
-			let term_credit = 0;
+			let CA = 0;
+			let CG = 0;
+			let GPA = 0;
 			let can_gpa = true;
 
 			for (let subj of results){
@@ -48,32 +53,48 @@ exports.compute = async (req,res) => {
 						Credit : subj.Credit
 					});
 
-					if(map_grade[subj.Grade] < 0)
+					if( _.get(map_grade, subj.Grade, -2) === -2){
 						can_gpa = false;
-					
-					gpa += map_grade[subj.Grade]*subj.Credit;
-					term_credit += subj.Credit;
+					}
+
+					if( subj.Grade === 'S'){
+						CG += subj.Credit;
+					}
+					else if(['U', 'W'].indexOf(subj.Grade) >= 0){
+						// do nothing
+					}
+					else if(_.get(map_grade, subj.Grade, -2) !== -2){
+						CA += subj.Credit;
+						CG += subj.Credit;
+						GPA += map_grade[subj.Grade] * subj.Credit;
+					}
+					console.log(CA,CG,GPA)
 				}
 			}
 
 			if(can_gpa){
-				gpax += gpa;
-				gpa /= term_credit;
-				acc_credit += term_credit;
-				temp_gpax = gpax/acc_credit;
+				GPX += GPA;
+				GPA /= CA;
+				CAX += CA;
+				CGX += CG;
+				GPAX = GPX / CAX;
+				temp_GPX = GPX;
 			}
 			else{
-				gpa = "X";
-				temp_gpax = "X";
-				acc_credit += term_credit;
+				GPA = "X";
+				GPAX = "X";
+				temp_GPX = "X"
 			}
 			
 			ret.push({Semester: sem,
 				Subjects: subjs,
-				GPA : gpa,
-				Credit: term_credit,
-				Total_credit: acc_credit,
-				GPAX: temp_gpax
+				GPA,
+				CA,
+				CG,
+				CAX,
+				CGX,
+				GPAX,
+				GPX : temp_GPX,
 			});
 		}
 
