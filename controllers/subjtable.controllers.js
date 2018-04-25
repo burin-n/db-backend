@@ -24,8 +24,9 @@ function parseTable(a){
 	}
 	for (var x = 0 ; x < a.length ; x++){
 		var day = date[a[x].SDay];
-		var data={	
+		var data={
 					"SubjID":a[x].SubjID,
+					"SName" : a[x].SName,
 					"BID":a[x].BuildID,
 					"RID":a[x].RoomID,
 					"STime":sToint(a[x].StartTime) , 
@@ -55,11 +56,11 @@ function parseTable(a){
 
 exports.getSubjTable = async (req,res) => {
 	try{
-		const query_string = "select R.SubjID, ST.SDay, ST.StartTime, ST.FinishTime, ST.BuildID, ST.RoomID\
-								from Register R, Sectime ST \
+		const query_string = "select R.SubjID, ST.SDay, ST.StartTime, ST.FinishTime, ST.BuildID, ST.RoomID, Sj.SName\
+								from Register R, Sectime ST, Subj Sj\
 								where R.StudentID = ? and R.Cyear = ? and R.CSemester = ?\
 								and R.CYear = ST.CYear and R.CSemester = ST.CSemester\
-								and R.SubjID = ST.SubjID and R.SecID = ST.SecID"
+								and R.SubjID = ST.SubjID and R.SecID = ST.SecID and Sj.SID = R.SubjID";
 
 
 		const fields = ['CYear', 'CSemester'];

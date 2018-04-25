@@ -150,7 +150,7 @@ CREATE TABLE Section (
             on update cascade
 );
 
-DROP TABLE if exists SecTime;
+DROP TABLE if exists Sectime;
 CREATE TABLE Sectime (
 	SubjID		varchar(7) not null,
     CYear		year not null,
