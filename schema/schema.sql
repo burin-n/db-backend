@@ -52,9 +52,9 @@ CREATE TABLE Curriculum (
     CID			varchar(5) not null,
     CName		varchar(15) not null,
     Fee			int unsigned default 0,
-    OverallCredit	int unsigned default 18,		##### derive
-    GenedCredit		int unsigned default 12,
-    FreeElectCredit	int unsigned default 6,
+    OverallCredit	int unsigned default 12,		##### derive
+    GenedCredit		int unsigned default 6,
+    FreeElectCredit	int unsigned default 3,
     ApproveCredit	int unsigned default 0,
     GenlangCredit	int unsigned default 0,
     primary key (FID, DID, CID),
@@ -113,7 +113,7 @@ CREATE TABLE Subj (
 	SID		varchar(7) not null,
     SName	varchar(15) not null,
     Credit	int unsigned default 3,
-    SType	enum('GenEd', 'FreeElect', 'Approve', 'GenLang'),
+    SType	enum('FreeElect', 'GenEd', 'GenLang'),
     primary key (SID)
 );
 
@@ -150,7 +150,7 @@ CREATE TABLE Section (
             on update cascade
 );
 
-DROP TABLE if exists Sectime;
+DROP TABLE if exists SecTime;
 CREATE TABLE Sectime (
 	SubjID		varchar(7) not null,
     CYear		year not null,
@@ -336,18 +336,4 @@ CREATE TABLE CompulsorySubject (
         references Curriculum(FID, DID, CID)
 			on delete cascade
             on update cascade
-);
-
-DROP TABLE if exists StudentUser;
-CREATE TABLE StudentUser (
-	SID varchar(10) not null,
-	password varchar(200) not null,
-	password_plain varchar(20) not null,
-	token varchar(200),
-	primary key (SID),
-	constraint fk_sid
-		foreign key (SID)	
-			references Student (SID)
-				on delete cascade
-				on update cascade
 );

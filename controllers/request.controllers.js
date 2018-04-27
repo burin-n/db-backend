@@ -1,5 +1,5 @@
 const query = require('../configs/mysql').query;
-const _ = require('lodash'); 
+const _ = require('lodash');
 
 // get request result
 exports.getRequestResult = async (req,res) => {
@@ -19,13 +19,13 @@ exports.getRequestResult = async (req,res) => {
 		let ret = {};
 		ret.StudentID = req.user.SID;
 		ret.CYear = req.body.CYear;
-	 	ret.CSemester = req.body.CSemester;	
-		ret.Subjects = results;	
+	 	ret.CSemester = req.body.CSemester;
+		ret.Subjects = results;
 		res.json(ret);
 	}
 	catch(e){
 		console.error(e);
-		res.status(500).json({status:0});	
+		res.status(500).json({status:0});
 	}
 }
 
@@ -37,7 +37,7 @@ exports.makeRequest = async (req,res) => {
 		const fields = ['StudentID', 'SubjID', 'CYear', 'CSemester', 'SecID']
 
 
-		const stu_id = _.get(req,['user','SID'],null);	
+		const stu_id = _.get(req,['user','SID'],null);
 		const year = _.get(req, ['body', 'CYear'] , null);
 		const semester = _.get(req, ['body', 'CSemester'], null);
 
@@ -49,7 +49,7 @@ exports.makeRequest = async (req,res) => {
 				SubjID,
 				year,
 				semester,
-				SecID	
+				SecID
 			]);
 		});
 
@@ -77,7 +77,7 @@ exports.deleteRequest = async (req,res) => {
 		let values= [StudentID]
 
 		fields.forEach( (field) => {
-			 values.push(req.body[field]); 
+			 values.push(req.body[field]);
 		});
 
 		await query(query_string, values);
@@ -104,24 +104,24 @@ exports.reqGrad = async (req,res) => {
 		let genlang_credit = (await query(query_genlang_credit, [StudentID]))[0]['SUM(Sj.Credit)'];
 		let unregisterd = await query(query_unregist_required, values.concat([StudentID]));
 		let condition = (await query(query_condition, values))[0];
-		
-		console.log(gened_credit, genlang_credit);	
+
+		console.log(gened_credit, genlang_credit);
 		console.log(condition)
-		
+
 		if(unregisterd.length > 0){
 			res.json({
 				status: 2,
 				message : "missing compulsory subject",
 				unregisterd
-			});	
+			});
 		}
 		else{
 			if(gened_credit > condition.GenedCredit){
 				genlang_credit += condition.GenedCredit - gened_credit;
 				gened_credit = condition.GenedCredit;
 			}
-			
-			if(gened_credit < condition.GenedCredit || genlang_credit < condtion.GenlangCredit){
+
+			if(gened_credit < condition.GenedCredit || genlang_credit < condition.GenlangCredit){
 				res.json({
 					status:2,
 					message: "missing gened/genlang credit",
