@@ -87,3 +87,57 @@ exports.deleteRequest = async (req,res) => {
 		res.status(500).json({status:0});
 	}
 }
+
+
+exports.reqGrad = async (req,res) => {
+	const StudentID = _.get(req, ['user', 'SID'] , null);
+	const query_gened_credit = "select SUM(Sj.Credit) from Register R, Subj Sj where R.StudentID = ? and R.SubjID = Sj.SID and Sj.Stype = 'GenEd'";
+	const query_genlang_credit = "select SUM(Sj.Credit) from Register R, Subj Sj where R.StudentID = ? and R.SubjID = Sj.SID and Sj.Stype = 'GenLang'";
+	const query_unregist_required = "select distinct C.SubjID from CompulsorySubject C where C.FID = ? and C.DID = ? and C.CID = ? and \
+																	not exists (select R.SubjID from Register R where R.StudentID = ?)";
+	const query_condition = "select * from Curriculum C where C.FID = ? and C.DID = ? and C.CID = ?";
+
+	const values = [req.user.FID, req.user.DID, req.user.CID];
+
+	try{
+		let gened_credit = (await query(query_gened_credit, [StudentID]))[0]['SUM(Sj.Credit)'];
+		let genlang_credit = (await query(query_genlang_credit, [StudentID]))[0]['SUM(Sj.Credit)'];
+		let unregisterd = await query(query_unregist_required, values.concat([StudentID]));
+		let condition = (await query(query_condition, values))[0];
+		
+		console.log(gened_credit, genlang_credit);	
+		console.log(condition)
+		
+		if(unregisterd.length > 0){
+			res.json({
+				status: 2,
+				message : "missing compulsory subject",
+				unregisterd
+			});	
+		}
+		else{
+			if(gened_credit > condition.GenedCredit){
+				genlang_credit += condition.GenedCredit - gened_credit;
+				gened_credit = condition.GenedCredit;
+			}
+			
+			if(gened_credit < condition.GenedCredit || genlang_credit < condtion.GenlangCredit){
+				res.json({
+					status:2,
+					message: "missing gened/genlang credit",
+					result: {genlang_credit, genlang_credit}
+				});
+			}
+			else{
+				res.json({
+					status:1,
+					message: "grad!"
+				})
+			}
+		}
+	}
+	catch(e){
+		console.error(e)
+		res.json({status:0});
+	}
+}
