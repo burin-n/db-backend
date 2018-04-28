@@ -52,7 +52,7 @@ CREATE TABLE Curriculum (
     CID			varchar(5) not null,
     CName		varchar(15) not null,
     Fee			int unsigned default 0,
-    OverallCredit	int unsigned default 12,		##### derive
+    OverallCredit	int unsigned default 9,		##### derive
     GenedCredit		int unsigned default 6,
     FreeElectCredit	int unsigned default 3,
     ApproveCredit	int unsigned default 0,

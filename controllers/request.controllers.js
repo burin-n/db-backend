@@ -91,22 +91,22 @@ exports.deleteRequest = async (req,res) => {
 
 exports.reqGrad = async (req,res) => {
 	const StudentID = _.get(req, ['user', 'SID'] , null);
-	const query_gened_credit = "select SUM(Sj.Credit) from Register R, Subj Sj where R.StudentID = ? and R.SubjID = Sj.SID and Sj.Stype = 'GenEd'";
-	const query_genlang_credit = "select SUM(Sj.Credit) from Register R, Subj Sj where R.StudentID = ? and R.SubjID = Sj.SID and Sj.Stype = 'GenLang'";
+	const query_notcompulsory_credit = "select SUM(Sj.Credit) from Register R, Subj Sj where R.StudentID = ? and R.SubjID = Sj.SID and R.Grade in ('A', 'B+', 'B', 'C+', 'C', 'D+', 'D') and \
+																			R.SubjID not in (select C.SubjID from CompulsorySubject C where C.FID = ? and C.DID = ? and C.CID = ?)"
+	const query_gened_credit = "select SUM(Sj.Credit) from Register R, Subj Sj where R.StudentID = ? and R.SubjID = Sj.SID and Sj.Stype = 'GenEd' and R.Grade in ('A', 'B+', 'B', 'C+', 'C', 'D+', 'D')";
+	const query_genlang_credit = "select SUM(Sj.Credit) from Register R, Subj Sj where R.StudentID = ? and R.SubjID = Sj.SID and Sj.Stype = 'GenLang' and R.Grade in ('A', 'B+', 'B', 'C+', 'C', 'D+', 'D')";
 	const query_unregist_required = "select distinct C.SubjID from CompulsorySubject C where C.FID = ? and C.DID = ? and C.CID = ? and \
-																	not exists (select R.SubjID from Register R where R.StudentID = ?)";
+																	C.SubjID not in (select R.SubjID from Register R where R.StudentID = ? and R.Grade in ('A', 'B+', 'B', 'C+', 'C', 'D+', 'D'))";
 	const query_condition = "select * from Curriculum C where C.FID = ? and C.DID = ? and C.CID = ?";
 
 	const values = [req.user.FID, req.user.DID, req.user.CID];
 
 	try{
+		let freeElect_credit = (await query(query_notcompulsory_credit, [StudentID].concat(values)))[0]['SUM(Sj.Credit)'];
 		let gened_credit = (await query(query_gened_credit, [StudentID]))[0]['SUM(Sj.Credit)'];
 		let genlang_credit = (await query(query_genlang_credit, [StudentID]))[0]['SUM(Sj.Credit)'];
 		let unregisterd = await query(query_unregist_required, values.concat([StudentID]));
 		let condition = (await query(query_condition, values))[0];
-
-		console.log(gened_credit, genlang_credit);
-		console.log(condition)
 
 		if(unregisterd.length > 0){
 			res.json({
@@ -116,16 +116,38 @@ exports.reqGrad = async (req,res) => {
 			});
 		}
 		else{
+			if(gened_credit == null){
+				gened_credit = 0;
+			}
+
+			if(genlang_credit == null){
+				genlang_credit = 0;
+			}
+
+			if(freeElect_credit == null){
+				freeElect_credit = 0;
+			}
+
+			console.log(gened_credit, genlang_credit, freeElect_credit);
+
 			if(gened_credit > condition.GenedCredit){
-				genlang_credit += condition.GenedCredit - gened_credit;
 				gened_credit = condition.GenedCredit;
 			}
 
-			if(gened_credit < condition.GenedCredit || genlang_credit < condition.GenlangCredit){
+			if(genlang_credit > condition.GenlangCredit){
+				genlang_credit = condition.GenlangCredit;
+			}
+
+			freeElect_credit -= (gened_credit + genlang_credit);
+
+			console.log(gened_credit, genlang_credit, freeElect_credit);
+			console.log(condition)
+
+			if(gened_credit < condition.GenedCredit || genlang_credit < condition.GenlangCredit || freeElect_credit < condition.FreeElectCredit){
 				res.json({
 					status:2,
-					message: "missing gened/genlang credit",
-					result: {genlang_credit, genlang_credit}
+					message: "missing gened/genlang/freeElect credit",
+					result: {gened_credit, genlang_credit, freeElect_credit}
 				});
 			}
 			else{
