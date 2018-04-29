@@ -150,6 +150,9 @@ CREATE TABLE Section (
             on update cascade
 );
 
+ALTER TABLE Section
+ADD INDEX sec_index USING BTREE (SubjID ASC, CYear ASC);
+
 DROP TABLE if exists SecTime;
 CREATE TABLE Sectime (
 	SubjID		varchar(7) not null,
@@ -336,4 +339,18 @@ CREATE TABLE CompulsorySubject (
         references Curriculum(FID, DID, CID)
 			on delete cascade
             on update cascade
+);
+
+DROP TABLE IF EXISTS StudentUser;
+CREATE TABLE StudentUser (
+	`SID` varchar(10) NOT NULL,
+	`password` varchar(200) NOT NULL,
+	`password_plain` varchar(20) NOT NULL,
+	`token` varchar(200) DEFAULT NULL,
+	PRIMARY KEY (`SID`),
+	CONSTRAINT `fk_sid`
+		FOREIGN KEY (`SID`)
+        REFERENCES `Student` (`SID`)
+			ON DELETE CASCADE
+            ON UPDATE CASCADE
 );

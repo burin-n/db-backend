@@ -161,3 +161,8 @@ INSERT INTO CompulsorySubject
 		('21', '10', '1', '2110101'),
         ('21', '10', '1', '2301107'),
         ('21', '10', '1', '2304197');
+
+INSERT INTO StudentUser
+	values
+	('4534534530','$2a$10$HC0jXPVCNXE4RGg.MLZKPuovyoPS8jvHQIT4OsZec9VudWnzniTLO','1234','1598b5072ec94b294dfcfaacc3f2a6f1ef80ac677ff524c5bcab06056c0fc144f8e20377e1cfb4c0132cdfce21266b151234567890'),
+	('9998877777','$2a$10$GQ8kAaPdNL9vzi.fm8U9GO9dkKoYPjpzmJMFqseBVeEZctCVyrAqy','1234','d65749d8b43d09ced4ffc7bd0af0dd490be731cf5cb79e7daedb023217579f04b3d4213e93dca2f78d202efe3a2a4dae9998877777');
