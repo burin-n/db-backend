@@ -13,8 +13,8 @@ exports.reserve = async (req,res) => {
 	  	req.body.RoomID,
 	  	req.body.StartTime,
 	  	req.body.FinishTime,
-			req.body.StartTime,
-	  	req.body.FinishTime,  	
+			req.body.FinishTime,
+	  	req.body.StartTime,  	
 	  ];
 
 	  let select_result = await query(query_string, val);
@@ -52,7 +52,7 @@ exports.table = async (req,res) => {
 		let query_string = "select * from RoomTable r \
 	    where r.BuildID = ? and r.RoomID = ? \
 	    and ((r.FinishTime >= ? and r.StartTime <= ?)\
-	    or (r.Starttime <= ? and r.FinishTime <= ?))\
+	    or (r.Starttime <= ? and r.FinishTime >= ?))\
 	    ORDER BY r.StartTime ASC;";
 
 	  let val = [
@@ -60,8 +60,8 @@ exports.table = async (req,res) => {
 	  	req.body.RoomID,
 	  	req.body.StartTime,
 	  	req.body.FinishTime,
-			req.body.StartTime,
-	  	req.body.FinishTime,  	
+			req.body.FinishTime,
+	  	req.body.StartTime,  	
 	  ];
  		
  		let select_result = await query(query_string, val);
