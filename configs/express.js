@@ -21,6 +21,7 @@ module.exports = () => {
 	require('../routes/room.routes')(app)
 	require('../routes/grade.routes')(app)
 	require('../routes/subjtable.routes')(app)
+	require('../routes/announcement.routes')(app)
 
 	return app;
 }
