@@ -7,7 +7,7 @@ exports.greeting = (req,res) => {
 
 exports.getRegisterResult = async (req,res) => {
 
-	const query_string  = "select SubjID,SecID,SName,Credit \
+	const query_string  = "select SubjID,SecID,SName,Credit,Grade \
 		from Register R, Subj S where R.StudentID = ? and R.CYear = ? \
 		and R.CSemester = ? and S.SID = R.SubjID";
 
