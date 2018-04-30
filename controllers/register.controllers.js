@@ -353,14 +353,12 @@ exports.payFee = async (req,res) => {
 
 exports.feeStatus = async (req,res) => {
 	try{
-		const query_string = "select FStatus from FeeStatus where \
-													StudentID=? and FYear=? and FSemester = ?";
-		let val = [ req.user.SID, req.query.FYear, req.query.FSemester ];
-		console.log(val)
-	
-		let result = await query(query_string, val);		
+		const query_string = "select C.Fee, F.FStatus, F.FYear, F.FSemester from FeeStatus F, Curriculum C, Student S where \
+			C.FID = S.FID and C.DID = S.DID and C.CID = S.CID and F.StudentID = S.SID and S.SID = ?";
 
-		res.json({status:1, result: result[0].FStatus});
+		let result = await query(query_string,  [req.user.SID]);
+
+		res.json({status:1, result});
 
 	}catch(e){
 		console.error(e);	
