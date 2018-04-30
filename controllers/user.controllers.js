@@ -44,11 +44,12 @@ exports.logout = async function(req, res){
 	const query_string = "update StudentUser set token = null where SID = ?";
 	
 		let result = await query(query_string, [SID]);
-		if(result[0].affectedRows > 0)
+		if(result.affectedRows > 0)
 			res.json({status:1, message:"success"});	
 		else
 			throw("Something went wrong");
 	}catch(e){
+		console.error(e)
 		res.status(500).json({status:0});
 	}	
 
