@@ -55,7 +55,6 @@ CREATE TABLE Curriculum (
     OverallCredit	int unsigned default 9,		##### derive
     GenedCredit		int unsigned default 6,
     FreeElectCredit	int unsigned default 3,
-    ApproveCredit	int unsigned default 0,
     GenlangCredit	int unsigned default 0,
     primary key (FID, DID, CID),
     constraint fk_Dpk
